@@ -35,54 +35,29 @@ def categoriaApi(request, id = 0):
         return JsonResponse("Categoria eliminada satisfactoriamente!", safe=False)
 
 @csrf_exempt
-def opcionApi(request, id = 0):
+def rondaApi(request, id = 0):
     if request.method == 'GET':
-        opciones = Opcion.objects.all()
-        opciones_serializer = OpcionSerializer(opciones, many = True)
-        return JsonResponse(opciones_serializer.data, safe=False)
-    elif request.method == 'POST':
-        opcion_data = JSONParser().parse(request)
-        opcion_serializer = OpcionSerializer(data=opcion_data)
-        if opcion_serializer.is_valid():
-            opcion_serializer.save()
-            return JsonResponse("Categoria añadida!", safe=False)
-        return JsonResponse("Falló al añadir la opcion", safe=False)
-    elif request.method == 'PUT':
-        opcion_data = JSONParser().parse(request)
-        opcion = Opcion.objects.get(id=opcion_data['id'])
-        opcion_serializer = OpcionSerializer(opcion, data=opcion_data)
-        if opcion_serializer.is_valid():
-            opcion_serializer.save()
-            return JsonResponse("Opcion actualizada correctamente!", safe=False)
-        return JsonResponse("Error al actualizar la Opcion", safe=False)
-    elif request.method == 'DELETE':
-        opcion = Opcion.objects.get(id=id)
-        opcion.delete()
-        return JsonResponse("Opcion eliminada satisfactoriamente!", safe=False)
-
-@csrf_exempt
-def premioApi(request, id = 0):
-    if request.method == 'GET':
-        premios = Premio.objects.all()
-        premios_serializer = PremioSerializer(premios, many = True)
-        return JsonResponse(premios_serializer.data, safe=False)
-    elif request.method == 'POST':
-        premio_data = JSONParser().parse(request)
-        premio_serializer = PremioSerializer(data=premio_data)
-        if premio_serializer.is_valid():
-            premio_serializer.save()
-            return JsonResponse("Premio añadido!", safe=False)
-        return JsonResponse("Falló al añadir el premio", safe=False)
-    elif request.method == 'PUT':
-        premio_data = JSONParser().parse(request)
-        premio = Premio.objects.get(id=premio_data['id'])
-        premio_serializer = PremioSerializer(premio, data=premio_data)
-        if premio_serializer.is_valid():
-            premio_serializer.save()
-            return JsonResponse("Premio actualizado correctamente!", safe=False)
-        return JsonResponse("Error al actualizar el premio", safe=False)
-    elif request.method == 'DELETE':
-        premio = Premio.objects.get(id=id)
-        premio.delete()
-        return JsonResponse("Premio eliminado satisfactoriamente!", safe=False)
+        rondas = Ronda.objects.all()
+        lista_rondas = []
+        for ronda in rondas.values():
+            categoria = Categoria.objects.get(id=ronda['categoria_id'])
+            premio = Premio.objects.get(id=ronda['premio_id'])
+            lista_rondas.append({
+                "ronda_id": ronda['id'],
+                "categoria": CategoriaSerializer(categoria, many=False).data,
+                "premio": PremioSerializer(premio, many=False).data
+            })
+        return JsonResponse(lista_rondas, safe=False)
+    if request.method == 'POST':
+        ronda_data = JSONParser().parse(request)
+        categorias = []
+        for ronda in ronda_data:
+            categoria = Categoria.objects.get_or_create(nombre = ronda['categoria']['nombre'])
+            premio = Premio.objects.get_or_create(nombre = ronda['premio']['nombre'], descripcion=ronda['premio']['descripcion'])
+            categorias.append(ronda['categoria']['nombre'])
+            try:
+                Ronda.objects.create(categoria=categoria[0], premio=premio[0])
+            except:
+                continue
+        return JsonResponse(categorias, safe=False)
 

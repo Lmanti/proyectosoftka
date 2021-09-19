@@ -27,7 +27,8 @@ class Premio(models.Model):
 class Ronda(models.Model):
     id = models.AutoField(primary_key=True)
     categoria = models.OneToOneField(Categoria, on_delete=models.CASCADE, null=False, blank=False, default=None)
-    premio = models.OneToOneField(Premio, on_delete=models.CASCADE, null=False, blank=False, default=None)
+    premio = models.ForeignKey(Premio, on_delete=models.CASCADE, null=False, blank=False, default=None)
+    # premio = models.OneToOneField(Premio, on_delete=models.CASCADE, null=False, blank=False, default=None)
 
 class Jugador(models.Model):
     id = models.AutoField(primary_key=True)
