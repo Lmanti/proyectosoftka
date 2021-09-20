@@ -1,15 +1,16 @@
-import { CREAR_RONDA } from "../actions";
+import { CARGAR_RONDAS, CREAR_RONDA } from "../actions";
 
 const INITIAL_STATE = {
-    categorias: ["fácil", "medio", "difícil", "pro", "leyenda"]
+    rondas: []
 }
 
 const rootReducer = (state = INITIAL_STATE, action) => {
     switch(action.type) {
-        case CREAR_RONDA:
+        case CARGAR_RONDAS:
+            console.log(action.payload)
             return {
                 ...state,
-                categorias: action.payload
+                rondas: action.payload.map(n => n.categoria.nombre)
             }
         default:
             return state

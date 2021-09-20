@@ -93,10 +93,13 @@ const Configurar = () => {
         ]
         if (validar(input)) {
             dispatch(crearRonda(info))
+            console.log(info)
             window.location.href = "/configuracion/preguntas"
         }
         else alert("Hay campos vacios!")     
     }
+
+    console.log(input)
 
     return (
         <div>
@@ -146,7 +149,7 @@ const Configurar = () => {
                         <label>Titulo del premio: </label>
                         <input type="text" name="titulo_premio_r3" />
                         <label>Descripción: </label>
-                        <textarea name="descripcion_premio_r1" cols="30" rows="5"></textarea>
+                        <textarea name="descripcion_premio_r3" cols="30" rows="5"></textarea>
                     </div>
                 </div>
                 <div>
@@ -161,7 +164,7 @@ const Configurar = () => {
                         <label>Titulo del premio: </label>
                         <input type="text" name="titulo_premio_r4" />
                         <label>Descripción: </label>
-                        <textarea name="descripcion_premio_r1" cols="30" rows="5"></textarea>
+                        <textarea name="descripcion_premio_r4" cols="30" rows="5"></textarea>
                     </div>
                 </div>
                 <div>
@@ -176,7 +179,7 @@ const Configurar = () => {
                         <label>Titulo del premio: </label>
                         <input type="text" name="titulo_premio_r5" />
                         <label>Descripción: </label>
-                        <textarea name="descripcion_premio_r1" cols="30" rows="5"></textarea>
+                        <textarea name="descripcion_premio_r5" cols="30" rows="5"></textarea>
                     </div>
                 </div>
                 <button>Enviar</button>

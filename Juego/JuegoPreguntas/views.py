@@ -9,32 +9,6 @@ from JuegoPreguntas.serializers import CategoriaSerializer, OpcionSerializer, Pr
 # Create your views here.
 
 @csrf_exempt
-def categoriaApi(request, id = 0):
-    if request.method == 'GET':
-        categorias = Categoria.objects.all()
-        categorias_serializer = CategoriaSerializer(categorias, many = True)
-        return JsonResponse(categorias_serializer.data, safe=False)
-    elif request.method == 'POST':
-        categoria_data = JSONParser().parse(request)
-        categoria_serializer = CategoriaSerializer(data=categoria_data)
-        if categoria_serializer.is_valid():
-            categoria_serializer.save()
-            return JsonResponse("Categoria añadida!", safe=False)
-        return JsonResponse("Falló al añadir la categoria", safe=False)
-    elif request.method == 'PUT':
-        categoria_data = JSONParser().parse(request)
-        categoria = Categoria.objects.get(id=categoria_data['id'])
-        categoria_serializer = CategoriaSerializer(categoria, data=categoria_data)
-        if categoria_serializer.is_valid():
-            categoria_serializer.save()
-            return JsonResponse("Categoria actualizada correctamente!", safe=False)
-        return JsonResponse("Error al actualizar la categoria", safe=False)
-    elif request.method == 'DELETE':
-        categoria = Categoria.objects.get(id=id)
-        categoria.delete()
-        return JsonResponse("Categoria eliminada satisfactoriamente!", safe=False)
-
-@csrf_exempt
 def rondaApi(request, id = 0):
     if request.method == 'GET':
         rondas = Ronda.objects.all()
@@ -59,5 +33,47 @@ def rondaApi(request, id = 0):
                 Ronda.objects.create(categoria=categoria[0], premio=premio[0])
             except:
                 continue
-        return JsonResponse(categorias, safe=False)
+        return JsonResponse("Rondas añadidas", safe=False)
 
+@csrf_exempt
+def preguntaApi(request, id = 0):
+    if request.method == 'POST':
+        preguntas_data = JSONParser().parse(request)
+        for categoria in preguntas_data:
+            categoria_pregunta = Categoria.objects.get(nombre=categoria['nombre'])
+            for pregunta in categoria['preguntas']:
+                opcion_A = Opcion.objects.get_or_create(descripcion=pregunta['opciones']['opcion_A']['descripcion'], escorrecta=pregunta['opciones']['opcion_A']['escorrecta'])
+                opcion_B = Opcion.objects.get_or_create(descripcion=pregunta['opciones']['opcion_B']['descripcion'], escorrecta=pregunta['opciones']['opcion_B']['escorrecta'])
+                opcion_C = Opcion.objects.get_or_create(descripcion=pregunta['opciones']['opcion_C']['descripcion'], escorrecta=pregunta['opciones']['opcion_C']['escorrecta'])
+                opcion_D = Opcion.objects.get_or_create(descripcion=pregunta['opciones']['opcion_D']['descripcion'], escorrecta=pregunta['opciones']['opcion_D']['escorrecta'])
+                try:
+                    p = Pregunta.objects.get_or_create(descripcion=pregunta['descripcion'], puntos=pregunta['puntos'], categoria=categoria_pregunta)
+                    p[0].opciones.add(opcion_A[0], opcion_B[0], opcion_C[0], opcion_D[0])
+                    p[0].save()
+                except Exception as e:
+                    print(e)
+                    continue
+        return JsonResponse("Preguntas añadidas!", safe=False)
+    if request.method == 'GET':
+        preguntas = Pregunta.objects.all()
+        preguntas_serializer = PreguntaSerializer(preguntas, many=True)
+        lista_preguntas = []
+        for pregunta in preguntas_serializer.data:
+            categoria = Categoria.objects.get(id=pregunta['categoria'])
+            opcion_A = Opcion.objects.get(id=pregunta['opciones'][0])
+            opcion_B = Opcion.objects.get(id=pregunta['opciones'][1])
+            opcion_C = Opcion.objects.get(id=pregunta['opciones'][2])
+            opcion_D = Opcion.objects.get(id=pregunta['opciones'][3])
+            lista_preguntas.append({
+                "id": pregunta['id'],
+                "descripcion": pregunta['descripcion'],
+                "puntos": pregunta['puntos'],
+                "categoria": CategoriaSerializer(categoria, many=False).data,
+                "opciones": [
+                    OpcionSerializer(opcion_A, many=False).data,
+                    OpcionSerializer(opcion_B, many=False).data,
+                    OpcionSerializer(opcion_C, many=False).data,
+                    OpcionSerializer(opcion_D, many=False).data
+                ]
+            })
+        return JsonResponse(lista_preguntas, safe=False)
