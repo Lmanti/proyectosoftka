@@ -10,8 +10,8 @@ const Preguntas = () => {
     const [input, setInput] = useState({})
 
     useEffect(() => {
-        console.log("entra")
         dispatch(cargarRondas())
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const handleInput = (e) => {

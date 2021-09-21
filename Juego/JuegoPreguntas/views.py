@@ -9,7 +9,9 @@ from JuegoPreguntas.serializers import CategoriaSerializer, OpcionSerializer, Pr
 # Create your views here.
 
 @csrf_exempt
+# Crear API para ronda
 def rondaApi(request, id = 0):
+    # El metodo GET toma los datos de la base de datos, los organiza y los manda en formato JSON
     if request.method == 'GET':
         rondas = Ronda.objects.all()
         lista_rondas = []
@@ -22,6 +24,7 @@ def rondaApi(request, id = 0):
                 "premio": PremioSerializer(premio, many=False).data
             })
         return JsonResponse(lista_rondas, safe=False)
+    # El metodo POST toma los datos entrantes y los clasifica, crea las entidades y relaciones
     if request.method == 'POST':
         ronda_data = JSONParser().parse(request)
         categorias = []
@@ -36,7 +39,9 @@ def rondaApi(request, id = 0):
         return JsonResponse("Rondas añadidas", safe=False)
 
 @csrf_exempt
+# Crear API para preguntas
 def preguntaApi(request, id = 0):
+    # El metodo post toma los datos entrantes, los parsea, los clasifica, crea las entidades correspondientes y las relaciones
     if request.method == 'POST':
         preguntas_data = JSONParser().parse(request)
         for categoria in preguntas_data:
@@ -54,6 +59,7 @@ def preguntaApi(request, id = 0):
                     print(e)
                     continue
         return JsonResponse("Preguntas añadidas!", safe=False)
+    # El metodo GET toma los datos de la base de datos, los organiza y los manda en formato JSON
     if request.method == 'GET':
         preguntas = Pregunta.objects.all()
         preguntas_serializer = PreguntaSerializer(preguntas, many=True)
@@ -77,3 +83,19 @@ def preguntaApi(request, id = 0):
                 ]
             })
         return JsonResponse(lista_preguntas, safe=False)
+
+@csrf_exempt
+# Crear API para jugadores
+def jugadorApi(request, id = 0):
+    # El metodo post crea el jugador en la base de datos
+    if request.method == 'POST':
+        jugador_datos = JSONParser().parse(request)
+        jugador_serializer = JugadorSerializer(data=jugador_datos)
+        if jugador_serializer.is_valid():
+            jugador_serializer.save()
+            return JsonResponse("jugador adañido correctamente", safe=False)
+    # Toma los datos de la db y los manda  en JSON al front
+    if request.method == 'GET':
+        jugadores = Jugador.objects.all()
+        jugadores_serializer = JugadorSerializer(jugadores, many=True)
+        return JsonResponse(jugadores_serializer.data, safe=False)
